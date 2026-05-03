@@ -28,6 +28,18 @@ typedef struct {
   uint8_t ssid[255];
 } BeaconFrame;
 
+typedef struct {
+  uint16_t frame_control   = 0x0040;  // Probe Request
+  uint16_t duration        = 0;
+  uint8_t  destination[6];            // FF:FF:FF:FF:FF:FF broadcast
+  uint8_t  source[6];
+  uint8_t  bssid[6];                  // FF:FF:FF:FF:FF:FF broadcast
+  uint16_t sequence_number = 0;
+  uint8_t  ssid_tag        = 0;       // IE tag 0 = SSID
+  uint8_t  ssid_length     = 0;
+  uint8_t  ssid[32];                  // max 32 bytes per 802.11 spec
+} ProbeFrame;
+
 /*
  * Import the needed c functions from the closed-source libraries
  * The function definitions might not be 100% accurate with the arguments as the types get lost during compilation and cannot be retrieved back during decompilation
@@ -41,5 +53,6 @@ extern "C" int dump_mgntframe(void* ptr, void* frame_control);
 void wifi_tx_raw_frame(void* frame, size_t length);
 void wifi_tx_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason = 0x06);
 void wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid);
+void wifi_tx_probe_frame(void* src_mac, const char* ssid);
 
 #endif

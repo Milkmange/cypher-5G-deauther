@@ -54,3 +54,23 @@ void wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid) {
   }
   wifi_tx_raw_frame(&frame, 38 + frame.ssid_length);
 }
+
+/*
+ * Transmits a 802.11 Probe Request frame with the given SSID.
+ * Useful for probe flooding — sends probes from a spoofed source MAC.
+ * @param src_mac  6-byte source MAC address array
+ * @param ssid     '\0'-terminated SSID string (max 32 chars per 802.11 spec)
+*/
+void wifi_tx_probe_frame(void* src_mac, const char* ssid) {
+  ProbeFrame frame;
+  memset(&frame.destination, 0xFF, 6);
+  memset(&frame.bssid,       0xFF, 6);
+  memcpy(&frame.source, src_mac, 6);
+  frame.ssid_length = 0;
+  for (int i = 0; ssid[i] != '\0' && i < 32; i++) {
+    frame.ssid[i] = ssid[i];
+    frame.ssid_length++;
+  }
+  // Frame size: fixed header fields (26 bytes) + ssid_tag(1) + ssid_length(1) + ssid
+  wifi_tx_raw_frame(&frame, 26 + 2 + frame.ssid_length);
+}

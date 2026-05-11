@@ -193,6 +193,10 @@ void checkScanComplete() {
     scan_results = filtered;
   }
 
+  // Restore AP — scanning takes the radio out of AP mode on RTL8720DN
+  WiFi.apbegin((char *)ap_ssid, (char *)ap_pass, (char *)String(current_channel).c_str());
+  server.begin();
+
   if (scan_results.size() == 0) {
     appState = STATE_MAIN_MENU;
     return;
@@ -989,19 +993,7 @@ void setup() {
   DEBUG_SER_INIT();
 
   WiFi.apbegin((char *)ap_ssid, (char *)ap_pass, (char *)String(current_channel).c_str());
-  server.begin();  // was missing in original
-
-  // Initial scan — one blocking delay is acceptable at boot
-  scan_results.clear();
-  wifi_scan_networks(scanResultHandler, NULL);
-  delay(settingScanTimeSec * 1000);
-
-  if (scan_results.size() > 0) {
-    selectedIdx = 0;
-    networkIdx  = 0;
-    memcpy(deauth_bssid, scan_results[0].bssid, 6);
-    memcpy(beacon_bssid, scan_results[0].bssid, 6);
-  }
+  server.begin();
 
   delay(1000);  // let title screen sit a moment
   appState = STATE_MAIN_MENU;
